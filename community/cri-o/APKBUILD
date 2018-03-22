@@ -1,0 +1,50 @@
+# Maintainer: Dan Williams <dan@ma.ssive.co>
+pkgname=cri-o
+pkgver=1.9.9
+pkgrel=rc5
+pkgdesc="CLI tool for spawning and running containers according to the OCI specification"
+url="https://github.com/kubernetes-incubator/cri-o"
+arch="all"
+license="Apache-2.0"
+depends=""
+makedepends="go libc6-compat glib-dev gpgme-dev linux-headers btrfs-progs-dev lvm2-dev libseccomp-dev"
+install=""
+subpackages=""
+source="cri-o-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz
+fix-cmsg.c-error-call.patch
+"
+
+builddir="$srcdir/$pkgname-$pkgver"
+
+export GOPATH=$srcdir/go
+export SHELL=/bin/sh
+
+dir=$GOPATH/src/github.com/kubernetes-incubator
+
+prepare() {
+	default_prepare
+
+	mkdir -p "$dir"
+	cp -R "$builddir" "$dir/$pkgname"
+}
+
+build() {
+        cd "$dir/$pkgname"
+				mkdir "$dir/$pkgname"/bin
+        make binaries
+}
+
+package() {
+	cd "$dir/$pkgname"
+	install -Dm755 bin/crio "$pkgdir"/usr/bin/crio
+	install -Dm755 bin/pause "$pkgdir"/usr/bin/pause
+	install -Dm755 bin/conmon "$pkgdir"/usr/bin/conmon
+}
+
+check() {
+        cd "$dir/$pkgname"
+        ./bin/crio --help > /dev/null
+}
+
+sha512sums="4fd23d8ff8934401b1c07c0567aa1b613f1912de71b5741476d1eca5323b45d8190b1303eda8e40944d7ca3ca6c22d42f8296bef646d9f10aa6cca04ae94d016  cri-o-1.9.9.tar.gz
+e0d9a6a684cae5b56ebbf1c153d66501aa2c6cbe610a89b7f7b4fae97a6971d41e8df6f6c7c3136280a63422970a906fd0cc088446106ee11eed7da286d17781  fix-cmsg.c-error-call.patch"
