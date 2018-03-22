@@ -1,0 +1,44 @@
+# Maintainer: Dan Williams <dan@ma.ssive.co>
+pkgname=runc
+pkgver=1.0.0_rc5
+pkgrel=1
+pkgdesc="CLI tool for spawning and running containers according to the OCI specification"
+url="https://github.com/opencontainers/runc"
+arch="all"
+license="Apache-2.0"
+depends="libseccomp-dev"
+makedepends="go"
+install=""
+subpackages=""
+source="https://github.com/opencontainers/runc/archive/v$pkgver-$pkgrel/_/-/.tar.gz
+	"
+builddir="$srcdir/$pkgname-$pkgver/_/-/"
+
+export GOPATH=$srcdir/go
+export SHELL=/bin/sh
+
+dir=$GOPATH/src/github.com/opencontainers
+
+prepare() {
+	default_prepare
+
+	mkdir -p "$dir"
+	cp -R "$builddir" "$dir/$pkgname"
+}
+
+build() {
+        cd "$dir/$pkgname"
+        make
+}
+
+package() {
+	cd "$dir/$pkgname"
+	install -Dm755 runc "$pkgdir"/usr/bin/runc
+}
+
+check() {
+        cd "$dir/$pkgname"
+        ./runc --help > /dev/null
+}
+
+sha512sums="714230887ff9706c29b0656c5cdb253698bde6252a23e7f48aa690747fb57abd7884c2da1c4d0e314f9f301c5962417351557d15d986e45fcc336e98069aeac6  v1.0.0-rc5.tar.gz"
